@@ -1,0 +1,22 @@
+<svg width="200" height="60" viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#3498db;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2980b9;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- ID Card Shape -->
+  <rect x="10" y="15" width="40" height="30" rx="3" fill="url(#logoGradient)" />
+  
+  <!-- Person Icon -->
+  <circle cx="30" cy="25" r="4" fill="white" />
+  <path d="M24 35 Q30 32 36 35" fill="white" />
+  
+  <!-- Text -->
+  <text x="60" y="35" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#2c3e50">Identi</text>
+  <text x="105" y="35" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#3498db">Guinée</text>
+  
+  <!-- Tagline -->
+  <text x="60" y="48" font-family="Arial, sans-serif" font-size="8" fill="#7f8c8d">Plateforme Nationale d'Identité Numérique</text>
+</svg>
