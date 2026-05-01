@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Document;
 
 class VerifierController extends Controller
 {
@@ -19,38 +20,48 @@ class VerifierController extends Controller
 
         $documentCode = $request->document_code;
 
-        $validDocuments = [
-            'CNI-2024-001234' => [
+        // Search for document in database
+        $document = Document::where('qr_code', $documentCode)
+            ->where('is_valid', true)
+            ->whereNull('revoked_at')
+            ->where('expiry_date', '>', now())
+            ->with('user')
+            ->first();
+
+        if ($document) {
+            $documentData = [
                 'valid' => true,
-                'type' => 'Carte Nationale d\'Identité',
-                'holder_name' => 'Mamadou Diallo',
-                'issue_date' => '2024-01-20',
-                'expiry_date' => '2034-01-20',
-                'birth_date' => '1990-05-15',
-                'birth_place' => 'Conakry'
-            ],
-            'PAS-2024-000567' => [
-                'valid' => true,
-                'type' => 'Passeport',
-                'holder_name' => 'Aïssatou Bah',
-                'issue_date' => '2024-02-15',
-                'expiry_date' => '2029-02-15',
-                'birth_date' => '1985-08-22',
-                'birth_place' => 'Kankan'
-            ],
-            'PER-2024-000890' => [
-                'valid' => true,
-                'type' => 'Permis de conduire',
-                'holder_name' => 'Ousmane Condé',
-                'issue_date' => '2024-01-10',
-                'expiry_date' => '2029-01-10',
-                'birth_date' => '1992-12-03',
-                'birth_place' => 'Labé'
-            ]
+                'type' => $this->getDocumentTypeLabel($document->document_type),
+                'holder_name' => $document->holder_name,
+                'issue_date' => $document->issue_date->format('d/m/Y'),
+                'expiry_date' => $document->expiry_date->format('d/m/Y'),
+                'birth_date' => $document->birth_date,
+                'birth_place' => $document->birth_place,
+                'reference' => $document->reference,
+                'user_email' => $document->user->email,
+                'verification_date' => now()->format('d/m/Y H:i:s')
+            ];
+        } else {
+            $documentData = [
+                'valid' => false,
+                'verification_date' => now()->format('d/m/Y H:i:s')
+            ];
+        }
+
+        return view('verifier.result', [
+            'document' => $documentData, 
+            'documentCode' => $documentCode
+        ]);
+    }
+
+    private function getDocumentTypeLabel($type)
+    {
+        $labels = [
+            'cni' => 'Carte Nationale d\'Identité',
+            'passeport' => 'Passeport',
+            'permis' => 'Permis de conduire'
         ];
 
-        $document = $validDocuments[$documentCode] ?? ['valid' => false];
-
-        return view('verifier.result', compact('document', 'documentCode'));
+        return $labels[$type] ?? $type;
     }
 }

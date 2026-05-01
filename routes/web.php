@@ -18,6 +18,11 @@ Route::prefix('citoyen')->name('citizen.')->group(function () {
     Route::get('/demande', [CitizenController::class, 'createRequest'])->name('request.create')->middleware('citizen.auth');
     Route::post('/demande', [CitizenController::class, 'storeRequest'])->name('request.store')->middleware('citizen.auth');
     Route::get('/documents', [CitizenController::class, 'documents'])->name('documents')->middleware('citizen.auth');
+    Route::get('/profil', [CitizenController::class, 'profile'])->name('profile')->middleware('citizen.auth');
+    Route::get('/profil/modifier', [CitizenController::class, 'editProfile'])->name('profile.edit')->middleware('citizen.auth');
+    Route::post('/profil/modifier', [CitizenController::class, 'updateProfile'])->name('profile.update')->middleware('citizen.auth');
+    Route::get('/mot-de-passe/changer', [CitizenController::class, 'showChangePassword'])->name('password.change')->middleware('citizen.auth');
+    Route::post('/mot-de-passe/changer', [CitizenController::class, 'changePassword'])->name('password.update')->middleware('citizen.auth');
     Route::get('/telecharger/{id}', [CitizenController::class, 'downloadDocument'])->name('download')->middleware('citizen.auth');
     Route::post('/deconnexion', [AuthController::class, 'citizenLogout'])->name('logout');
 });

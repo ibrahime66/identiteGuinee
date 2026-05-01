@@ -145,9 +145,9 @@
                         <a href="{{ route('citizen.documents') }}" class="btn btn-outline-primary">
                             <i class="fas fa-folder me-2"></i>Mes documents
                         </a>
-                        <button class="btn btn-outline-secondary" disabled>
+                        <a href="{{ route('citizen.profile') }}" class="btn btn-outline-secondary">
                             <i class="fas fa-user-edit me-2"></i>Mon profil
-                        </button>
+                        </a>
                     </div>
                 </div>
             </div>

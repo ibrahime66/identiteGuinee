@@ -31,7 +31,7 @@
                         </div>
                         <div class="col-md-6">
                             <strong>Date de vérification :</strong>
-                            <p>{{ now()->format('d/m/Y H:i:s') }}</p>
+                            <p>{{ $document['verification_date'] ?? now()->format('d/m/Y H:i:s') }}</p>
                         </div>
                     </div>
 
