@@ -1,0 +1,16 @@
+=== SAUVEGARDE BASE DE DONNEES IDENTIGUINEE ===
+Date de sauvegarde: 01/05/2026 14:28:55
+Base de données: mysql
+
+=== STATISTIQUES ===
+Utilisateurs: 2
+Demandes: 0
+Documents: 0
+
+=== DONNEES UTILISATEURS ===
+User[1]: Administrateur Principal (admin@identiguinee.gn)
+User[2]: ibrahima sory (citoyen@identiguinee.gn)
+
+=== DONNEES DEMANDES ===
+
+=== DONNEES DOCUMENTS ===

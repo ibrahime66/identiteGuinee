@@ -59,7 +59,8 @@ class VerifierController extends Controller
         $labels = [
             'cni' => 'Carte Nationale d\'Identité',
             'passeport' => 'Passeport',
-            'permis' => 'Permis de conduire'
+            'permis' => 'Permis de conduire',
+            'extrait' => 'Extrait de naissance'
         ];
 
         return $labels[$type] ?? $type;

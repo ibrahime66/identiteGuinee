@@ -47,7 +47,7 @@
                         <div class="mb-4">
                             <label class="form-label fw-bold">Type de document *</label>
                             <div class="row">
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <div class="form-check">
                                         <input class="form-check-input" type="radio" name="document_type" 
                                                id="cni" value="cni" required>
@@ -57,7 +57,7 @@
                                         </label>
                                     </div>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <div class="form-check">
                                         <input class="form-check-input" type="radio" name="document_type" 
                                                id="passeport" value="passeport">
@@ -67,13 +67,23 @@
                                         </label>
                                     </div>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <div class="form-check">
                                         <input class="form-check-input" type="radio" name="document_type" 
                                                id="permis" value="permis">
                                         <label class="form-check-label" for="permis">
                                             <i class="fas fa-car me-2 text-primary"></i>
                                             <strong>Permis de conduire</strong>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="document_type" 
+                                               id="extrait" value="extrait">
+                                        <label class="form-check-label" for="extrait">
+                                            <i class="fas fa-file-alt me-2 text-primary"></i>
+                                            <strong>Extrait de naissance</strong>
                                         </label>
                                     </div>
                                 </div>

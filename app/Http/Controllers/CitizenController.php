@@ -48,7 +48,7 @@ class CitizenController extends Controller
     public function storeRequest(Request $request)
     {
         $request->validate([
-            'document_type' => 'required|in:cni,passeport,permis',
+            'document_type' => 'required|in:cni,passeport,permis,extrait',
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'birth_date' => 'required|date',
@@ -396,7 +396,8 @@ class CitizenController extends Controller
         $labels = [
             'cni' => 'Carte Nationale d\'Identité',
             'passeport' => 'Passeport',
-            'permis' => 'Permis de conduire'
+            'permis' => 'Permis de conduire',
+            'extrait' => 'Extrait de naissance'
         ];
 
         return $labels[$type] ?? $type;

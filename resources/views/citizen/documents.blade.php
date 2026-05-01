@@ -47,6 +47,9 @@
                                                 @case('Permis de conduire')
                                                     <i class="fas fa-car text-primary" style="font-size: 3rem;"></i>
                                                     @break
+                                                @case('Extrait de naissance')
+                                                    <i class="fas fa-file-alt text-primary" style="font-size: 3rem;"></i>
+                                                    @break
                                             @endswitch
                                         </div>
                                         <h6 class="card-title">{{ $document['type'] }}</h6>

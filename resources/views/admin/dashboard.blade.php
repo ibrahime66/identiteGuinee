@@ -153,12 +153,12 @@
                         <a href="{{ route('admin.requests') }}?status=pending" class="btn btn-warning">
                             <i class="fas fa-clock me-2"></i>En attente ({{ $stats['pending_requests'] }})
                         </a>
-                        <button class="btn btn-outline-secondary" disabled>
+                        <a href="{{ route('admin.reports') }}" class="btn btn-outline-secondary">
                             <i class="fas fa-chart-bar me-2"></i>Rapports
-                        </button>
-                        <button class="btn btn-outline-secondary" disabled>
+                        </a>
+                        <a href="{{ route('admin.settings') }}" class="btn btn-outline-secondary">
                             <i class="fas fa-cog me-2"></i>Paramètres
-                        </button>
+                        </a>
                     </div>
                 </div>
             </div>

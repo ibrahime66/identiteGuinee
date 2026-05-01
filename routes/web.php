@@ -35,6 +35,11 @@ Route::prefix('administration')->name('admin.')->group(function () {
     Route::get('/demande/{id}', [AdminController::class, 'showRequest'])->name('request.show')->middleware('admin.auth');
     Route::post('/demande/{id}/valider', [AdminController::class, 'validateRequest'])->name('request.validate')->middleware('admin.auth');
     Route::post('/demande/{id}/rejeter', [AdminController::class, 'rejectRequest'])->name('request.reject')->middleware('admin.auth');
+    Route::get('/rapports', [AdminController::class, 'reports'])->name('reports')->middleware('admin.auth');
+    Route::get('/parametres', [AdminController::class, 'settings'])->name('settings')->middleware('admin.auth');
+    Route::post('/parametres/vider-cache', [AdminController::class, 'clearCache'])->name('settings.clear-cache')->middleware('admin.auth');
+    Route::get('/parametres/exporter', [AdminController::class, 'exportData'])->name('settings.export')->middleware('admin.auth');
+    Route::post('/parametres/sauvegarder', [AdminController::class, 'backupDatabase'])->name('settings.backup')->middleware('admin.auth');
     Route::post('/deconnexion', [AuthController::class, 'adminLogout'])->name('logout');
 });
 
