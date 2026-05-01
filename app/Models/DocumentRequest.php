@@ -9,6 +9,8 @@ class DocumentRequest extends Model
 {
     use HasFactory;
 
+    protected $table = 'document_requests';
+
     protected $fillable = [
         'reference',
         'user_id',

@@ -62,15 +62,6 @@
                         </a>
                     </div>
 
-                    <hr class="my-4">
-
-                    <div class="text-center">
-                        <small class="text-muted">
-                            <strong>Demo :</strong><br>
-                            Email: admin@identiguinee.gn<br>
-                            Mot de passe: admin123
-                        </small>
-                    </div>
                 </div>
             </div>
         </div>

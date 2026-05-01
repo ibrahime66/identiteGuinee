@@ -62,15 +62,6 @@
                         </p>
                     </div>
 
-                    <hr class="my-4">
-
-                    <div class="text-center">
-                        <small class="text-muted">
-                            <strong>Demo :</strong><br>
-                            Email: citoyen@identiguinee.gn<br>
-                            Mot de passe: password
-                        </small>
-                    </div>
                 </div>
             </div>
         </div>

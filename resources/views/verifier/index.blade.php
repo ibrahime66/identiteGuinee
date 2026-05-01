@@ -103,34 +103,6 @@
                 </div>
             </div>
 
-            <div class="card mt-4">
-                <div class="card-header">
-                    <h5 class="mb-0">Codes de test</h5>
-                </div>
-                <div class="card-body">
-                    <p class="text-muted mb-3">Utilisez ces codes pour tester la vérification :</p>
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="border rounded p-3 text-center">
-                                <code>CNI-2024-001234</code>
-                                <p class="text-muted small mb-0 mt-2">Carte d'identité valide</p>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="border rounded p-3 text-center">
-                                <code>PAS-2024-000567</code>
-                                <p class="text-muted small mb-0 mt-2">Passeport valide</p>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="border rounded p-3 text-center">
-                                <code>PER-2024-000890</code>
-                                <p class="text-muted small mb-0 mt-2">Permis valide</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </div>

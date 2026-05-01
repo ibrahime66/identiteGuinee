@@ -80,7 +80,7 @@
             <div class="card text-center">
                 <div class="card-body">
                     <i class="fas fa-percentage text-secondary" style="font-size: 2rem;"></i>
-                    <h4 class="mt-2">{{ round(($stats['validated_requests'] / $stats['total_requests']) * 100, 1) }}%</h4>
+                    <h4 class="mt-2">{{ $stats['total_requests'] > 0 ? round(($stats['validated_requests'] / $stats['total_requests']) * 100, 1) : 0 }}%</h4>
                     <p class="text-muted mb-0">Taux validation</p>
                 </div>
             </div>
@@ -97,39 +97,46 @@
                     </a>
                 </div>
                 <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Référence</th>
-                                    <th>Citoyen</th>
-                                    <th>Type</th>
-                                    <th>Date</th>
-                                    <th>Statut</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($recentRequests as $request)
-                                <tr>
-                                    <td><strong>{{ $request['reference'] }}</strong></td>
-                                    <td>{{ $request['citizen_name'] }}</td>
-                                    <td>{{ $request['document_type'] }}</td>
-                                    <td>{{ \Carbon\Carbon::parse($request['date'])->format('d/m/Y') }}</td>
-                                    <td>
-                                        <span class="status-badge status-en-cours">En cours</span>
-                                    </td>
-                                    <td>
-                                        <a href="{{ route('admin.request.show', $request['id']) }}" 
-                                           class="btn btn-sm btn-primary">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
+                    @if(count($recentRequests) > 0)
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Référence</th>
+                                        <th>Citoyen</th>
+                                        <th>Type</th>
+                                        <th>Date</th>
+                                        <th>Statut</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($recentRequests as $request)
+                                    <tr>
+                                        <td><strong>{{ $request['reference'] }}</strong></td>
+                                        <td>{{ $request['citizen_name'] }}</td>
+                                        <td>{{ $request['document_type'] }}</td>
+                                        <td>{{ \Carbon\Carbon::parse($request['date'])->format('d/m/Y') }}</td>
+                                        <td>
+                                            <span class="status-badge status-en-cours">{{ $request['status'] }}</span>
+                                        </td>
+                                        <td>
+                                            <a href="{{ route('admin.request.show', $request['id']) }}" 
+                                               class="btn btn-sm btn-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @else
+                        <div class="text-center py-4">
+                            <i class="fas fa-inbox text-muted" style="font-size: 3rem;"></i>
+                            <p class="text-muted mt-3">Aucune demande trouvée</p>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -162,41 +169,9 @@
                 </div>
                 <div class="card-body">
                     <div class="timeline">
-                        <div class="d-flex mb-3">
-                            <div class="flex-shrink-0">
-                                <div class="bg-success text-white rounded-circle p-2" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
-                                    <i class="fas fa-check"></i>
-                                </div>
-                            </div>
-                            <div class="flex-grow-1 ms-3">
-                                <h6 class="mb-1">Demande validée</h6>
-                                <p class="text-muted small mb-0">CNI-2024-001235 - Fatoumata Touré</p>
-                                <small class="text-muted">Il y a 2 heures</small>
-                            </div>
-                        </div>
-                        <div class="d-flex mb-3">
-                            <div class="flex-shrink-0">
-                                <div class="bg-primary text-white rounded-circle p-2" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
-                                    <i class="fas fa-plus"></i>
-                                </div>
-                            </div>
-                            <div class="flex-grow-1 ms-3">
-                                <h6 class="mb-1">Nouvelle demande</h6>
-                                <p class="text-muted small mb-0">PAS-2024-000567 - Aïssatou Bah</p>
-                                <small class="text-muted">Il y a 3 heures</small>
-                            </div>
-                        </div>
-                        <div class="d-flex">
-                            <div class="flex-shrink-0">
-                                <div class="bg-danger text-white rounded-circle p-2" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
-                                    <i class="fas fa-times"></i>
-                                </div>
-                            </div>
-                            <div class="flex-grow-1 ms-3">
-                                <h6 class="mb-1">Demande rejetée</h6>
-                                <p class="text-muted small mb-0">PER-2024-000891 - Mohamed Camara</p>
-                                <small class="text-muted">Il y a 5 heures</small>
-                            </div>
+                        <div class="text-center text-muted">
+                            <i class="fas fa-history" style="font-size: 2rem; opacity: 0.3;"></i>
+                            <p class="mt-2">Aucune activité récente</p>
                         </div>
                     </div>
                 </div>

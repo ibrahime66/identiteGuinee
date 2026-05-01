@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
+use App\Models\DocumentRequest;
+use App\Models\Document;
+use App\Models\User;
 
 class AdminController extends Controller
 {
@@ -20,110 +23,80 @@ class AdminController extends Controller
     public function dashboard()
     {
         $stats = [
-            'total_requests' => 1247,
-            'pending_requests' => 89,
-            'validated_requests' => 1056,
-            'rejected_requests' => 102,
-            'today_requests' => 23
+            'total_requests' => DocumentRequest::count(),
+            'pending_requests' => DocumentRequest::where('status', 'en cours')->count(),
+            'validated_requests' => DocumentRequest::where('status', 'validée')->count(),
+            'rejected_requests' => DocumentRequest::where('status', 'rejetée')->count(),
+            'today_requests' => DocumentRequest::whereDate('created_at', today())->count()
         ];
 
-        $recentRequests = [
-            [
-                'id' => 1,
-                'reference' => 'CNI-2024-001234',
-                'citizen_name' => 'Mamadou Diallo',
-                'document_type' => 'Carte Nationale d\'Identité',
-                'status' => 'en cours',
-                'date' => '2024-03-15'
-            ],
-            [
-                'id' => 2,
-                'reference' => 'PAS-2024-000567',
-                'citizen_name' => 'Aïssatou Bah',
-                'document_type' => 'Passeport',
-                'status' => 'en cours',
-                'date' => '2024-03-15'
-            ],
-            [
-                'id' => 3,
-                'reference' => 'PER-2024-000890',
-                'citizen_name' => 'Ousmane Condé',
-                'document_type' => 'Permis de conduire',
-                'status' => 'en cours',
-                'date' => '2024-03-14'
-            ]
-        ];
+        $recentRequests = DocumentRequest::with('user')
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get()
+            ->map(function ($request) {
+                return [
+                    'id' => $request->id,
+                    'reference' => $request->reference,
+                    'citizen_name' => $request->user->name,
+                    'document_type' => $this->getDocumentTypeLabel($request->document_type),
+                    'status' => $request->status,
+                    'date' => $request->created_at->format('Y-m-d')
+                ];
+            });
 
         return view('admin.dashboard', compact('stats', 'recentRequests'));
     }
 
     public function requests()
     {
-        $requests = [
-            [
-                'id' => 1,
-                'reference' => 'CNI-2024-001234',
-                'citizen_name' => 'Mamadou Diallo',
-                'citizen_email' => 'mamadou.diallo@email.com',
-                'document_type' => 'Carte Nationale d\'Identité',
-                'status' => 'en cours',
-                'date' => '2024-03-15',
-                'priority' => 'normal'
-            ],
-            [
-                'id' => 2,
-                'reference' => 'PAS-2024-000567',
-                'citizen_name' => 'Aïssatou Bah',
-                'citizen_email' => 'aissatou.bah@email.com',
-                'document_type' => 'Passeport',
-                'status' => 'en cours',
-                'date' => '2024-03-15',
-                'priority' => 'urgent'
-            ],
-            [
-                'id' => 3,
-                'reference' => 'PER-2024-000890',
-                'citizen_name' => 'Ousmane Condé',
-                'citizen_email' => 'ousmane.conde@email.com',
-                'document_type' => 'Permis de conduire',
-                'status' => 'en cours',
-                'date' => '2024-03-14',
-                'priority' => 'normal'
-            ],
-            [
-                'id' => 4,
-                'reference' => 'CNI-2024-001235',
-                'citizen_name' => 'Fatoumata Touré',
-                'citizen_email' => 'fatoumata.toure@email.com',
-                'document_type' => 'Carte Nationale d\'Identité',
-                'status' => 'validée',
-                'date' => '2024-03-13',
-                'priority' => 'normal'
-            ]
-        ];
+        $status = request('status');
+        $query = DocumentRequest::with('user')->orderBy('created_at', 'desc');
+        
+        if ($status) {
+            $query->where('status', $status);
+        }
+
+        $requests = $query->get()->map(function ($request) {
+            return [
+                'id' => $request->id,
+                'reference' => $request->reference,
+                'citizen_name' => $request->user->name,
+                'citizen_email' => $request->user->email,
+                'citizen_phone' => $request->user->phone,
+                'document_type' => $this->getDocumentTypeLabel($request->document_type),
+                'status' => $request->status,
+                'date' => $request->created_at->format('Y-m-d'),
+                'priority' => $request->priority
+            ];
+        });
 
         return view('admin.requests', compact('requests'));
     }
 
     public function showRequest($id)
     {
+        $documentRequest = DocumentRequest::with('user')->findOrFail($id);
+        
         $request = [
-            'id' => $id,
-            'reference' => 'CNI-2024-001234',
-            'citizen_name' => 'Mamadou Diallo',
-            'citizen_email' => 'mamadou.diallo@email.com',
-            'citizen_phone' => '+224 622 12 34 56',
-            'document_type' => 'Carte Nationale d\'Identité',
-            'status' => 'en cours',
-            'date' => '2024-03-15',
-            'first_name' => 'Mamadou',
-            'last_name' => 'Diallo',
-            'birth_date' => '1990-05-15',
-            'birth_place' => 'Conakry',
-            'address' => 'Rue du Commerce, Dixinn, Conakry',
-            'profession' => 'Comptable',
-            'nationality' => 'Guinéenne',
-            'notes' => 'Demande complète avec tous les documents requis.'
+            'id' => $documentRequest->id,
+            'reference' => $documentRequest->reference,
+            'citizen_name' => $documentRequest->user->name,
+            'citizen_email' => $documentRequest->user->email,
+            'citizen_phone' => $documentRequest->user->phone,
+            'document_type' => $this->getDocumentTypeLabel($documentRequest->document_type),
+            'status' => $documentRequest->status,
+            'date' => $documentRequest->created_at->format('Y-m-d'),
+            'first_name' => $documentRequest->first_name,
+            'last_name' => $documentRequest->last_name,
+            'birth_date' => $documentRequest->birth_date,
+            'birth_place' => $documentRequest->birth_place,
+            'address' => $documentRequest->address,
+            'profession' => $documentRequest->user->profession,
+            'nationality' => $documentRequest->user->nationality,
+            'notes' => $documentRequest->notes,
+            'priority' => $documentRequest->priority,
+            'rejection_reason' => $documentRequest->rejection_reason
         ];
 
         return view('admin.request-detail', compact('request'));
@@ -131,6 +104,30 @@ class AdminController extends Controller
 
     public function validateRequest(Request $request, $id)
     {
+        $adminId = Session::get('admin_id');
+        $documentRequest = DocumentRequest::findOrFail($id);
+        
+        $documentRequest->update([
+            'status' => 'validée',
+            'validated_at' => now(),
+            'validated_by' => $adminId
+        ]);
+
+        // Create the document
+        Document::create([
+            'reference' => $documentRequest->reference,
+            'user_id' => $documentRequest->user_id,
+            'request_id' => $documentRequest->id,
+            'document_type' => $documentRequest->document_type,
+            'holder_name' => $documentRequest->first_name . ' ' . $documentRequest->last_name,
+            'birth_date' => $documentRequest->birth_date,
+            'birth_place' => $documentRequest->birth_place,
+            'issue_date' => now(),
+            'expiry_date' => now()->addYears(10),
+            'qr_code' => $documentRequest->reference,
+            'is_valid' => true
+        ]);
+
         return redirect()->route('admin.requests')->with('success', 'La demande a été validée avec succès');
     }
 
@@ -140,6 +137,27 @@ class AdminController extends Controller
             'reason' => 'required|string|max:500'
         ]);
 
+        $adminId = Session::get('admin_id');
+        $documentRequest = DocumentRequest::findOrFail($id);
+        
+        $documentRequest->update([
+            'status' => 'rejetée',
+            'rejection_reason' => $request->reason,
+            'rejected_at' => now(),
+            'rejected_by' => $adminId
+        ]);
+
         return redirect()->route('admin.requests')->with('success', 'La demande a été rejetée avec la raison spécifiée');
+    }
+
+    private function getDocumentTypeLabel($type)
+    {
+        $labels = [
+            'cni' => 'Carte Nationale d\'Identité',
+            'passeport' => 'Passeport',
+            'permis' => 'Permis de conduire'
+        ];
+
+        return $labels[$type] ?? $type;
     }
 }

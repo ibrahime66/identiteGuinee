@@ -66,7 +66,7 @@
                             <td>
                                 <small>
                                     <div>{{ $request['citizen_email'] }}</div>
-                                    <div>{{ $request['citizen_phone'] }}</div>
+                                    <div>{{ $request['citizen_phone'] ?? 'Non spécifié' }}</div>
                                 </small>
                             </td>
                             <td>{{ $request['document_type'] }}</td>
