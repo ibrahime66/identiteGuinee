@@ -1,0 +1,57 @@
+FROM php:8.2-apache
+
+# Installer dépendances système
+RUN apt-get update && apt-get install -y \
+    libzip-dev \
+    unzip \
+    git \
+    curl \
+    libonig-dev \
+    libxml2-dev \
+    && docker-php-ext-install pdo pdo_mysql zip mbstring xml
+
+# Installer Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Activer mod_rewrite
+RUN a2enmod rewrite
+
+# Copier uniquement les fichiers nécessaires pour éviter les problèmes de cache
+COPY composer.json composer.lock ./
+COPY app/ ./app/
+COPY bootstrap/ ./bootstrap/
+COPY config/ ./config/
+COPY database/ ./database/
+COPY public/ ./public/
+COPY resources/ ./resources/
+COPY routes/ ./routes/
+COPY storage/ ./storage/
+COPY artisan ./
+
+WORKDIR /var/www/html
+
+# Créer les dossiers nécessaires
+RUN mkdir -p storage bootstrap/cache \
+    && chmod -R 777 storage bootstrap/cache
+
+# Créer le fichier .env
+RUN echo "APP_NAME=IdentiGuinee\nAPP_ENV=production\nAPP_KEY=\nAPP_DEBUG=false\nAPP_URL=http://localhost\nDB_CONNECTION=mysql\nDB_HOST=127.0.0.1\nDB_PORT=3306\nDB_DATABASE=identiguinee\nDB_USERNAME=root\nDB_PASSWORD=\n" > .env
+
+# Installer dépendances sans scripts problématiques
+RUN composer install --no-dev --no-interaction --no-scripts --prefer-dist
+
+# Optimiser l'autoloader séparément
+RUN composer dump-autoload --optimize
+
+# Générer la clé Laravel
+RUN php artisan key:generate --force
+
+# Configurer Apache
+RUN echo '<VirtualHost *:80>\n    DocumentRoot /var/www/html/public\n    <Directory /var/www/html/public>\n        AllowOverride All\n        Require all granted\n    </Directory>\n</VirtualHost>' > /etc/apache2/sites-available/000-default.conf
+
+# Permissions finales
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html \
+    && chmod -R 777 /var/www/html/storage /var/www/html/bootstrap/cache
+
+EXPOSE 80

@@ -1,4 +1,4 @@
-FROM php:8.4-apache
+FROM php:8.2-apache
 
 # Installer dépendances système
 RUN apt-get update && apt-get install -y \
@@ -28,11 +28,8 @@ RUN mkdir -p storage bootstrap/cache \
 # Créer le fichier .env s'il n'existe pas
 RUN cp .env.example .env || echo "APP_NAME=IdentiGuinee\nAPP_ENV=production\nAPP_KEY=\nAPP_DEBUG=false\nAPP_URL=http://localhost\nDB_CONNECTION=mysql\nDB_HOST=127.0.0.1\nDB_PORT=3306\nDB_DATABASE=identiguinee\nDB_USERNAME=root\nDB_PASSWORD=\n" > .env
 
-# Installer dépendances Laravel étape par étape
-RUN composer install --no-interaction --no-plugins --no-scripts --prefer-dist
-
-# Optimiser l'autoloader
-RUN composer dump-autoload --optimize --classmap-authoritative
+# Installer dépendances Laravel avec options compatibles
+RUN composer install --no-interaction --no-scripts --prefer-dist --optimize-autoloader
 
 # Générer la clé Laravel
 RUN php artisan key:generate --force
