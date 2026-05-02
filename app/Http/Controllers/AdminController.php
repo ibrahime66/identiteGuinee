@@ -14,7 +14,7 @@ class AdminController extends Controller
     {
         $this->middleware(function ($request, $next) {
             if (!Session::get('admin_authenticated')) {
-                return redirect()->route('admin.login');
+                return redirect()->route('login');
             }
             return $next($request);
         })->except(['showAdminLogin', 'adminLogin']);

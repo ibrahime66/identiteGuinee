@@ -44,17 +44,17 @@
             <div class="card text-center">
                 <div class="card-body">
                     <i class="fas fa-check-circle text-success" style="font-size: 2rem;"></i>
-                    <h5 class="mt-2">{{ collect($requests)->where('status', 'validée')->count() }}</h5>
-                    <p class="text-muted mb-0">Validées</p>
+                    <h5 class="mt-2">{{ collect($requests)->whereIn('status', ['approuvé', 'validée'])->count() }}</h5>
+                    <p class="text-muted mb-0">Documents valides</p>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card text-center">
                 <div class="card-body">
-                    <i class="fas fa-clock text-warning" style="font-size: 2rem;"></i>
-                    <h5 class="mt-2">{{ collect($requests)->where('status', 'en cours')->count() }}</h5>
-                    <p class="text-muted mb-0">En cours</p>
+                    <i class="fas fa-download text-info" style="font-size: 2rem;"></i>
+                    <h5 class="mt-2">{{ $documentsCount ?? 0 }}</h5>
+                    <p class="text-muted mb-0">Documents disponibles</p>
                 </div>
             </div>
         </div>
@@ -95,12 +95,15 @@
                                     @foreach($requests as $request)
                                     <tr>
                                         <td><strong>{{ $request['reference'] }}</strong></td>
-                                        <td>{{ $request['type'] }}</td>
-                                        <td>{{ \Carbon\Carbon::parse($request['date'])->format('d/m/Y') }}</td>
+                                        <td>{{ $request['document_type'] }}</td>
+                                        <td>{{ $request['created_at'] }}</td>
                                         <td>
                                             @switch($request['status'])
+                                                @case('approuvé')
+                                                    <span class="status-badge status-validée">Généré</span>
+                                                    @break
                                                 @case('validée')
-                                                    <span class="status-badge status-validée">Validée</span>
+                                                    <span class="status-badge status-validée">Validé</span>
                                                     @break
                                                 @case('en cours')
                                                     <span class="status-badge status-en-cours">En cours</span>
@@ -111,11 +114,16 @@
                                             @endswitch
                                         </td>
                                         <td>
-                                            @if($request['status'] === 'validée')
-                                                <a href="{{ route('citizen.download', $request['id']) }}" 
-                                                   class="btn btn-sm btn-success">
+                                            @if($request['status'] === 'approuvé' || $request['status'] === 'validée')
+                                                <a href="{{ route('citizen.download', $request['reference']) }}" 
+                                                   class="btn btn-sm btn-success me-1">
                                                     <i class="fas fa-download"></i>
                                                 </a>
+                                                <button type="button" 
+                                                        class="btn btn-sm btn-danger" 
+                                                        onclick="confirmDelete('{{ $request['reference'] }}', '{{ str_replace("'", "\\'", $request['document_type']) }}')">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
                                             @endif
                                         </td>
                                     </tr>
@@ -166,4 +174,47 @@
         </div>
     </div>
 </div>
+
+<script>
+function confirmDelete(reference, documentType) {
+    console.log('Tentative de suppression:', reference, documentType);
+    
+    if (confirm('Êtes-vous sûr de vouloir supprimer ce ' + documentType + ' (Réf: ' + reference + ') ?\n\nCette action est irréversible.')) {
+        console.log('Confirmation reçue, création du formulaire...');
+        
+        // Créer un formulaire pour la suppression
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/citoyen/document/' + reference + '/supprimer';
+        form.style.display = 'none';
+        
+        // Ajouter le token CSRF
+        const csrfToken = document.createElement('input');
+        csrfToken.type = 'hidden';
+        csrfToken.name = '_token';
+        csrfToken.value = '{{ csrf_token() }}';
+        form.appendChild(csrfToken);
+        
+        // Ajouter la méthode DELETE
+        const methodField = document.createElement('input');
+        methodField.type = 'hidden';
+        methodField.name = '_method';
+        methodField.value = 'DELETE';
+        form.appendChild(methodField);
+        
+        console.log('Formulaire créé:', form);
+        
+        // Soumettre le formulaire
+        document.body.appendChild(form);
+        form.submit();
+    } else {
+        console.log('Suppression annulée');
+    }
+}
+
+// Vérifier que la fonction est bien chargée
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Dashboard chargé, fonction confirmDelete disponible:', typeof confirmDelete);
+});
+</script>
 @endsection

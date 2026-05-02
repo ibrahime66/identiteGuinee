@@ -14,10 +14,10 @@
                     <a class="nav-link" href="{{ route('home') }}">Accueil</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('citizen.login') }}">Espace Citoyen</a>
+                    <a class="nav-link" href="{{ route('login') }}">Se connecter</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('admin.login') }}">Administration</a>
+                    <a class="nav-link" href="{{ route('citizen.register') }}">Créer un compte</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('verifier.index') }}">Vérification</a>

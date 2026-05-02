@@ -9,12 +9,12 @@ use App\Models\User;
 
 class AuthController extends Controller
 {
-    public function showCitizenLogin()
+    public function showLogin()
     {
-        return view('auth.citizen-login');
+        return view('auth.login');
     }
 
-    public function citizenLogin(Request $request)
+    public function login(Request $request)
     {
         $request->validate([
             'email' => 'required|email',
@@ -26,20 +26,35 @@ class AuthController extends Controller
         if (Auth::attempt($credentials)) {
             $user = Auth::user();
             
-            if ($user->role === 'citizen') {
+            // Vérifier le rôle et rediriger selon le cas
+            if ($user->role === 'admin') {
+                // Vérifier que c'est l'email admin autorisé
+                if ($user->email !== 'ibrahimebarry520@gmail.com') {
+                    Auth::logout();
+                    return back()->with('error', 'Accès administrateur non autorisé')->withInput();
+                }
+                
+                Session::put('admin_authenticated', true);
+                Session::put('admin_name', $user->name);
+                Session::put('admin_id', $user->id);
+                
+                return redirect()->route('admin.dashboard')->with('success', 'Connexion administrateur réussie');
+                
+            } elseif ($user->role === 'citizen') {
                 Session::put('citizen_authenticated', true);
                 Session::put('citizen_name', $user->name);
                 Session::put('citizen_email', $user->email);
                 Session::put('citizen_id', $user->id);
                 
-                return redirect()->route('citizen.dashboard')->with('success', 'Connexion réussie');
+                return redirect()->route('citizen.dashboard')->with('success', 'Connexion citoyen réussie');
+                
+            } else {
+                Auth::logout();
+                return back()->with('error', 'Rôle non reconnu')->withInput();
             }
-            
-            Auth::logout();
-            return back()->withErrors(['email' => 'Accès non autorisé pour ce compte'])->withInput();
         }
 
-        return back()->withErrors(['email' => 'Identifiants incorrects'])->withInput();
+        return back()->with('error', 'Email ou mot de passe incorrect')->withInput();
     }
 
     public function showCitizenRegister()
@@ -53,17 +68,20 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|min:6|confirmed',
-            'phone' => 'required|string|max:20',
-            'cni_number' => 'required|string|max:20'
+            'phone' => 'required|string|max:20'
         ]);
+
+        // Générer automatiquement le numéro CNI
+        $cniNumber = $this->generateCniNumber();
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => bcrypt($request->password),
             'phone' => $request->phone,
-            'cni_number' => $request->cni_number,
-            'role' => 'citizen'
+            'cni_number' => $cniNumber,
+            'role' => 'citizen',
+            'nationality' => 'Guinéenne'
         ]);
 
         Auth::login($user);
@@ -73,14 +91,22 @@ class AuthController extends Controller
         Session::put('citizen_email', $user->email);
         Session::put('citizen_id', $user->id);
         
-        return redirect()->route('citizen.dashboard')->with('success', 'Inscription réussie');
+        return redirect()->route('citizen.dashboard')->with('success', 'Inscription réussie ! Votre numéro CNI est : ' . $cniNumber);
+    }
+
+    private function generateCniNumber()
+    {
+        // Générer un numéro CNI unique
+        $year = date('Y');
+        $sequence = str_pad(mt_rand(1, 999999), 6, '0', STR_PAD_LEFT);
+        return 'CNI-' . $year . '-' . $sequence;
     }
 
     public function citizenLogout()
     {
         Auth::logout();
         Session::forget(['citizen_authenticated', 'citizen_name', 'citizen_email', 'citizen_id']);
-        return redirect()->route('citizen.login')->with('success', 'Déconnexion réussie');
+        return redirect()->route('login')->with('success', 'Déconnexion réussie');
     }
 
     public function showAdminLogin()
@@ -94,6 +120,11 @@ class AuthController extends Controller
             'email' => 'required|email',
             'password' => 'required|min:6'
         ]);
+
+        // Vérifier que l'email est autorisé pour l'admin
+        if ($request->email !== 'ibrahimebarry520@gmail.com') {
+            return back()->with('error', 'Accès administrateur non autorisé')->withInput();
+        }
 
         $credentials = $request->only('email', 'password');
         
@@ -119,6 +150,6 @@ class AuthController extends Controller
     {
         Auth::logout();
         Session::forget(['admin_authenticated', 'admin_name', 'admin_id']);
-        return redirect()->route('admin.login')->with('success', 'Déconnexion réussie');
+        return redirect()->route('login')->with('success', 'Déconnexion réussie');
     }
 }

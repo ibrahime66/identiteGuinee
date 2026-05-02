@@ -53,7 +53,105 @@
                     </div>
                     <div class="row">
                         <div class="col-12">
-                            <strong>Notes :</strong> {{ $request['notes'] }}
+                            <strong>Informations spécifiques :</strong>
+                            @if($request['notes'])
+                                <?php 
+                                $notes = json_decode($request['notes'], true);
+                                if ($notes && is_array($notes)) {
+                                    echo '<div class="mt-2">';
+                                    foreach ($notes as $key => $value) {
+                                        if ($value) {
+                                            $label = '';
+                                            switch($key) {
+                                                case 'profession':
+                                                    $label = 'Profession';
+                                                    break;
+                                                case 'height':
+                                                    $label = 'Taille';
+                                                    $value = $value . ' cm';
+                                                    break;
+                                                case 'distinguishing_marks':
+                                                    $label = 'Signes particuliers';
+                                                    break;
+                                                case 'previous_cni':
+                                                    $label = 'Ancien CNI';
+                                                    break;
+                                                case 'has_previous_cni':
+                                                    $label = 'Type demande CNI';
+                                                    $value = $value == 'first' ? 'Première demande' : ($value == 'renewal' ? 'Renouvellement' : 'Duplicata');
+                                                    break;
+                                                case 'profession_passport':
+                                                    $label = 'Profession';
+                                                    break;
+                                                case 'travel_purpose':
+                                                    $label = 'Motif de voyage';
+                                                    $value = ucfirst($value);
+                                                    break;
+                                                case 'destination_countries':
+                                                    $label = 'Pays de destination';
+                                                    break;
+                                                case 'previous_passport':
+                                                    $label = 'Ancien passeport';
+                                                    break;
+                                                case 'has_previous_passport':
+                                                    $label = 'Type demande passeport';
+                                                    $value = $value == 'first' ? 'Première demande' : ($value == 'renewal' ? 'Renouvellement' : 'Duplicata');
+                                                    break;
+                                                case 'license_category':
+                                                    $label = 'Catégorie permis';
+                                                    break;
+                                                case 'driving_experience':
+                                                    $label = 'Années d\'expérience';
+                                                    $value = $value . ' ans';
+                                                    break;
+                                                case 'license_issue_country':
+                                                    $label = 'Pays de délivrance';
+                                                    break;
+                                                case 'previous_license':
+                                                    $label = 'Ancien permis';
+                                                    break;
+                                                case 'has_previous_license':
+                                                    $label = 'Type demande permis';
+                                                    $value = $value == 'first' ? 'Première demande' : ($value == 'renewal' ? 'Renouvellement' : ($value == 'duplicate' ? 'Duplicata' : 'Échange'));
+                                                    break;
+                                                case 'father_name':
+                                                    $label = 'Nom du père';
+                                                    $value = strtoupper($value);
+                                                    break;
+                                                case 'mother_name':
+                                                    $label = 'Nom de la mère';
+                                                    $value = strtoupper($value);
+                                                    break;
+                                                case 'father_profession':
+                                                    $label = 'Profession du père';
+                                                    $value = ucfirst($value);
+                                                    break;
+                                                case 'mother_profession':
+                                                    $label = 'Profession de la mère';
+                                                    $value = ucfirst($value);
+                                                    break;
+                                                case 'declaration_date':
+                                                    $label = 'Date de déclaration';
+                                                    $value = date('d/m/Y', strtotime($value));
+                                                    break;
+                                                case 'declaration_place':
+                                                    $label = 'Lieu de déclaration';
+                                                    $value = ucfirst($value);
+                                                    break;
+                                                default:
+                                                    $label = ucfirst(str_replace('_', ' ', $key));
+                                            }
+                                            echo '<div class="mb-2"><strong>' . $label . ':</strong> ' . htmlspecialchars($value) . '</div>';
+                                        }
+                                    }
+                                    echo '</div>';
+                                } else {
+                                    echo '<span class="text-muted">Aucune information spécifique</span>';
+                                }
+                                ?>
+                            @else
+                                <span class="text-muted">Aucune information spécifique</span>
+                            @endif
                         </div>
                     </div>
                 </div>

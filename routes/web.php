@@ -9,9 +9,11 @@ use App\Http\Controllers\AuthController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
+// Connexion unique pour tous les rôles
+Route::get('/connexion', [AuthController::class, 'showLogin'])->name('login');
+Route::post('/connexion', [AuthController::class, 'login']);
+
 Route::prefix('citoyen')->name('citizen.')->group(function () {
-    Route::get('/connexion', [AuthController::class, 'showCitizenLogin'])->name('login');
-    Route::post('/connexion', [AuthController::class, 'citizenLogin']);
     Route::get('/inscription', [AuthController::class, 'showCitizenRegister'])->name('register');
     Route::post('/inscription', [AuthController::class, 'citizenRegister']);
     Route::get('/dashboard', [CitizenController::class, 'dashboard'])->name('dashboard')->middleware('citizen.auth');
@@ -23,13 +25,12 @@ Route::prefix('citoyen')->name('citizen.')->group(function () {
     Route::post('/profil/modifier', [CitizenController::class, 'updateProfile'])->name('profile.update')->middleware('citizen.auth');
     Route::get('/mot-de-passe/changer', [CitizenController::class, 'showChangePassword'])->name('password.change')->middleware('citizen.auth');
     Route::post('/mot-de-passe/changer', [CitizenController::class, 'changePassword'])->name('password.update')->middleware('citizen.auth');
-    Route::get('/telecharger/{id}', [CitizenController::class, 'downloadDocument'])->name('download')->middleware('citizen.auth');
+    Route::get('/telecharger/{reference}', [CitizenController::class, 'downloadDocument'])->name('download')->middleware('citizen.auth');
+    Route::delete('/document/{reference}/supprimer', [CitizenController::class, 'deleteDocument'])->name('document.delete')->middleware('citizen.auth');
     Route::post('/deconnexion', [AuthController::class, 'citizenLogout'])->name('logout');
 });
 
 Route::prefix('administration')->name('admin.')->group(function () {
-    Route::get('/connexion', [AuthController::class, 'showAdminLogin'])->name('login');
-    Route::post('/connexion', [AuthController::class, 'adminLogin']);
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard')->middleware('admin.auth');
     Route::get('/demandes', [AdminController::class, 'requests'])->name('requests')->middleware('admin.auth');
     Route::get('/demande/{id}', [AdminController::class, 'showRequest'])->name('request.show')->middleware('admin.auth');

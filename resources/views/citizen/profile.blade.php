@@ -22,65 +22,177 @@
 <div class="container">
     <div class="row">
         <div class="col-lg-8">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">Informations personnelles</h5>
+            <div class="card shadow-sm">
+                <div class="card-header bg-gradient-primary text-white py-3">
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle bg-white text-primary d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                            <i class="fas fa-user fa-lg"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0">Informations personnelles</h5>
+                            <small class="opacity-75">Profil citoyen Identiguinée</small>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <div class="row">
+                <div class="card-body p-4">
+                    <!-- Informations principales -->
+                    <div class="row mb-4">
                         <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">Nom complet</label>
-                                <p class="form-control-plaintext">{{ $citizen->name }}</p>
+                            <div class="info-item">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="icon-box bg-primary bg-opacity-10 text-primary rounded-circle p-2 me-3">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <div>
+                                        <small class="text-muted d-block">Nom complet</small>
+                                        <span class="fw-bold text-dark">{{ $citizen->name }}</span>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="mb-3">
-                                <label class="form-label">Email</label>
-                                <p class="form-control-plaintext">{{ $citizen->email }}</p>
+                            <div class="info-item">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="icon-box bg-success bg-opacity-10 text-success rounded-circle p-2 me-3">
+                                        <i class="fas fa-envelope"></i>
+                                    </div>
+                                    <div>
+                                        <small class="text-muted d-block">Email</small>
+                                        <span class="text-dark">{{ $citizen->email }}</span>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="mb-3">
-                                <label class="form-label">Téléphone</label>
-                                <p class="form-control-plaintext">{{ $citizen->phone ?? 'Non spécifié' }}</p>
+                            <div class="info-item">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="icon-box bg-info bg-opacity-10 text-info rounded-circle p-2 me-3">
+                                        <i class="fas fa-phone"></i>
+                                    </div>
+                                    <div>
+                                        <small class="text-muted d-block">Téléphone</small>
+                                        <span class="text-dark">{{ $citizen->phone }}</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">Numéro CNI</label>
-                                <p class="form-control-plaintext">{{ $citizen->cni_number ?? 'Non spécifié' }}</p>
+                            <div class="info-item">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="icon-box bg-warning bg-opacity-10 text-warning rounded-circle p-2 me-3">
+                                        <i class="fas fa-id-card"></i>
+                                    </div>
+                                    <div>
+                                        <small class="text-muted d-block">Numéro CNI</small>
+                                        <span class="fw-bold text-dark">{{ $citizen->cni_number }}</span>
+                                        <br><small class="text-muted"><i class="fas fa-lock fa-xs"></i> Non modifiable</small>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="mb-3">
-                                <label class="form-label">Date de naissance</label>
-                                <p class="form-control-plaintext">{{ $citizen->birth_date ? $citizen->birth_date->format('d/m/Y') : 'Non spécifiée' }}</p>
+                            <div class="info-item">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="icon-box bg-secondary bg-opacity-10 text-secondary rounded-circle p-2 me-3">
+                                        <i class="fas fa-birthday-cake"></i>
+                                    </div>
+                                    <div>
+                                        <small class="text-muted d-block">Date de naissance</small>
+                                        @if($citizen->birth_date)
+                                            <span class="text-dark">{{ $citizen->birth_date->format('d/m/Y') }}</span>
+                                        @else
+                                            <span class="text-muted">Non spécifiée</span>
+                                        @endif
+                                    </div>
+                                </div>
                             </div>
-                            <div class="mb-3">
-                                <label class="form-label">Lieu de naissance</label>
-                                <p class="form-control-plaintext">{{ $citizen->birth_place ?? 'Non spécifié' }}</p>
+                            <div class="info-item">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="icon-box bg-secondary bg-opacity-10 text-secondary rounded-circle p-2 me-3">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                    </div>
+                                    <div>
+                                        <small class="text-muted d-block">Lieu de naissance</small>
+                                        @if($citizen->birth_place)
+                                            <span class="text-dark">{{ $citizen->birth_place }}</span>
+                                        @else
+                                            <span class="text-muted">Non spécifié</span>
+                                        @endif
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="mb-3">
-                                <label class="form-label">Adresse</label>
-                                <p class="form-control-plaintext">{{ $citizen->address ?? 'Non spécifiée' }}</p>
+
+                    <!-- Informations additionnelles -->
+                    <div class="border-top pt-3">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="info-item">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="icon-box bg-secondary bg-opacity-10 text-secondary rounded-circle p-2 me-3">
+                                            <i class="fas fa-home"></i>
+                                        </div>
+                                        <div>
+                                            <small class="text-muted d-block">Adresse</small>
+                                            @if($citizen->address)
+                                                <span class="text-dark">{{ $citizen->address }}</span>
+                                            @else
+                                                <span class="text-muted">Non spécifiée</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">Profession</label>
-                                <p class="form-control-plaintext">{{ $citizen->profession ?? 'Non spécifiée' }}</p>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">Nationalité</label>
-                                <p class="form-control-plaintext">{{ $citizen->nationality }}</p>
+                            <div class="col-md-6">
+                                <div class="info-item">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="icon-box bg-secondary bg-opacity-10 text-secondary rounded-circle p-2 me-3">
+                                            <i class="fas fa-briefcase"></i>
+                                        </div>
+                                        <div>
+                                            <small class="text-muted d-block">Profession</small>
+                                            @if($citizen->profession)
+                                                <span class="text-dark">{{ $citizen->profession }}</span>
+                                            @else
+                                                <span class="text-muted">Non spécifiée</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="icon-box bg-danger bg-opacity-10 text-danger rounded-circle p-2 me-3">
+                                            <i class="fas fa-flag"></i>
+                                        </div>
+                                        <div>
+                                            <small class="text-muted d-block">Nationalité</small>
+                                            <span class="text-dark">{{ $citizen->nationality }}</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <style>
+            .icon-box {
+                width: 35px;
+                height: 35px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+            }
+            .info-item small {
+                font-size: 0.75rem;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                font-weight: 600;
+            }
+            .info-item span {
+                font-size: 0.95rem;
+            }
+            .bg-gradient-primary {
+                background: linear-gradient(135deg, #0066cc 0%, #0052a3 100%) !important;
+            }
+            </style>
         </div>
         <div class="col-lg-4">
             <div class="card">

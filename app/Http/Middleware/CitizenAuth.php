@@ -11,7 +11,7 @@ class CitizenAuth
     public function handle(Request $request, Closure $next)
     {
         if (!Session::get('citizen_authenticated')) {
-            return redirect()->route('citizen.login');
+            return redirect()->route('login');
         }
         return $next($request);
     }

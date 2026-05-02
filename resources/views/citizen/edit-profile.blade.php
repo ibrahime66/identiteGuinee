@@ -69,10 +69,8 @@
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="cni_number" class="form-label">Numéro CNI</label>
-                                    <input type="text" class="form-control" id="cni_number" name="cni_number" value="{{ $citizen->cni_number ?? '' }}">
-                                    @error('cni_number')
-                                        <div class="text-danger small">{{ $message }}</div>
-                                    @enderror
+                                    <input type="text" class="form-control" id="cni_number" value="{{ $citizen->cni_number ?? '' }}" readonly>
+                                    <small class="text-muted">Numéro CNI généré automatiquement - Non modifiable</small>
                                 </div>
                             </div>
                         </div>

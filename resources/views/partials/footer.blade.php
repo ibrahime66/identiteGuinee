@@ -8,16 +8,16 @@
             <div class="col-lg-4 mb-4">
                 <h5 class="mb-3">Services</h5>
                 <ul class="list-unstyled">
-                    <li><a href="{{ route('citizen.login') }}" class="text-white-50">Espace Citoyen</a></li>
-                    <li><a href="{{ route('admin.login') }}" class="text-white-50">Administration</a></li>
+                    <li><a href="{{ route('login') }}" class="text-white-50">Se connecter</a></li>
+                    <li><a href="{{ route('citizen.register') }}" class="text-white-50">Créer un compte</a></li>
                     <li><a href="{{ route('verifier.index') }}" class="text-white-50">Vérification</a></li>
                 </ul>
             </div>
             <div class="col-lg-4 mb-4">
                 <h5 class="mb-3">Contact</h5>
                 <p class="text-white-50">
-                    <i class="fas fa-envelope me-2"></i>contact@identiguinee.gn<br>
-                    <i class="fas fa-phone me-2"></i>+224 622 12 34 56<br>
+                    <i class="fas fa-envelope me-2"></i>ibrahimebarry683@gmail.com<br>
+                    <i class="fas fa-phone me-2"></i>622180933<br>
                     <i class="fas fa-map-marker-alt me-2"></i>Conakry, Guinée
                 </p>
             </div>

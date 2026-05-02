@@ -15,7 +15,7 @@ class CitizenController extends Controller
     {
         $this->middleware(function ($request, $next) {
             if (!Session::get('citizen_authenticated')) {
-                return redirect()->route('citizen.login');
+                return redirect()->route('login');
             }
             return $next($request);
         })->except(['showCitizenLogin', 'citizenLogin', 'showCitizenRegister', 'citizenRegister']);
@@ -30,14 +30,19 @@ class CitizenController extends Controller
             ->map(function ($request) {
                 return [
                     'id' => $request->id,
-                    'type' => $this->getDocumentTypeLabel($request->document_type),
+                    'reference' => $request->reference,
+                    'document_type' => $this->getDocumentTypeLabel($request->document_type),
                     'status' => $request->status,
-                    'date' => $request->created_at->format('Y-m-d'),
-                    'reference' => $request->reference
+                    'created_at' => $request->created_at->format('d/m/Y H:i')
                 ];
             });
 
-        return view('citizen.dashboard', compact('requests'));
+        // Compter les documents disponibles (valides)
+        $documentsCount = Document::where('user_id', $citizenId)
+            ->where('is_valid', true)
+            ->count();
+
+        return view('citizen.dashboard', compact('requests', 'documentsCount'));
     }
 
     public function createRequest()
@@ -165,7 +170,8 @@ class CitizenController extends Controller
                 break;
         }
 
-        DocumentRequest::create(array_merge([
+        // Créer la demande
+        $documentRequest = DocumentRequest::create(array_merge([
             'reference' => $reference,
             'user_id' => $citizenId,
             'document_type' => $documentType,
@@ -175,11 +181,41 @@ class CitizenController extends Controller
             'birth_place' => $request->birth_place,
             'address' => $request->address,
             'phone' => $request->phone,
-            'status' => 'en cours',
+            'status' => 'approuvé',
             'priority' => 'normal'
         ], $additionalData));
 
-        return redirect()->route('citizen.dashboard')->with('success', 'Votre demande a été soumise avec succès');
+        // Générer automatiquement le document
+        $this->generateDocument($documentRequest);
+
+        return redirect()->route('citizen.dashboard')->with('success', 'Votre document a été généré avec succès');
+    }
+
+    private function generateDocument($documentRequest)
+    {
+        // Créer le document dans la table documents
+        $document = Document::create([
+            'reference' => $documentRequest->reference,
+            'user_id' => $documentRequest->user_id,
+            'document_type' => $documentRequest->document_type,
+            'holder_name' => $documentRequest->first_name . ' ' . $documentRequest->last_name,
+            'birth_date' => $documentRequest->birth_date,
+            'birth_place' => $documentRequest->birth_place,
+            'issue_date' => now(),
+            'expiry_date' => now()->addYears(5), // Valide 5 ans
+            'qr_code' => $this->generateQRCode($documentRequest->reference),
+            'is_valid' => true,
+            'notes' => $documentRequest->notes,
+            'request_id' => $documentRequest->id // Ajout de l'ID de la demande
+        ]);
+
+        return $document;
+    }
+
+    private function generateQRCode($reference)
+    {
+        // Générer un code QR simple basé sur la référence
+        return 'IDG-' . strtoupper($reference) . '-' . date('Y');
     }
 
     public function documents()
@@ -250,12 +286,12 @@ class CitizenController extends Controller
         $citizen->update([
             'name' => $request->name,
             'phone' => $request->phone,
-            'cni_number' => $request->cni_number,
             'birth_date' => $request->birth_date,
             'birth_place' => $request->birth_place,
             'address' => $request->address,
             'profession' => $request->profession,
             'nationality' => $request->nationality
+            // Note: cni_number n'est pas modifiable
         ]);
 
         return redirect()->route('citizen.profile')->with('success', 'Profil mis à jour avec succès');
@@ -293,10 +329,10 @@ class CitizenController extends Controller
         return redirect()->route('citizen.profile')->with('success', 'Mot de passe changé avec succès');
     }
 
-    public function downloadDocument($id)
+    public function downloadDocument($reference)
     {
         $citizenId = Session::get('citizen_id');
-        $document = Document::where('id', $id)
+        $document = Document::where('reference', $reference)
             ->where('user_id', $citizenId)
             ->where('is_valid', true)
             ->first();
@@ -315,6 +351,41 @@ class CitizenController extends Controller
         $dompdf->render();
         
         return $dompdf->stream($document->reference . '.pdf', ['Attachment' => true]);
+    }
+
+    public function deleteDocument($reference)
+    {
+        $citizenId = Session::get('citizen_id');
+        
+        // D'abord supprimer la demande (car c'est ce qui est affiché dans le dashboard)
+        $request = DocumentRequest::where('reference', $reference)
+            ->where('user_id', $citizenId)
+            ->first();
+
+        if (!$request) {
+            \Log::error('Demande non trouvée pour la référence: ' . $reference);
+            return back()->with('error', 'Demande non trouvée');
+        }
+
+        \Log::info('Demande trouvée: ' . $request->id . ' - ' . $request->reference);
+
+        // Supprimer le document associé s'il existe
+        $document = Document::where('reference', $reference)
+            ->where('user_id', $citizenId)
+            ->first();
+
+        if ($document) {
+            \Log::info('Document trouvé et supprimé: ' . $document->id);
+            $document->delete();
+        } else {
+            \Log::info('Aucun document trouvé pour cette référence');
+        }
+
+        // Supprimer la demande
+        $request->delete();
+        \Log::info('Demande supprimée: ' . $reference);
+
+        return redirect()->route('citizen.dashboard')->with('success', 'Document supprimé avec succès');
     }
 
     private function generateDocumentPDF($document)

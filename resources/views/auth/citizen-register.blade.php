@@ -72,21 +72,14 @@
                         </div>
 
                         <div class="row">
-                            <div class="col-md-6 mb-3">
+                            <div class="col-12 mb-3">
                                 <label for="phone" class="form-label">Téléphone</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-phone"></i></span>
                                     <input type="tel" class="form-control" id="phone" name="phone" 
                                            value="{{ old('phone') }}" required>
                                 </div>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="cni" class="form-label">Numéro CNI</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-id-card"></i></span>
-                                    <input type="text" class="form-control" id="cni" name="cni" 
-                                           value="{{ old('cni') }}" required>
-                                </div>
+                                <small class="text-muted">Votre numéro CNI sera généré automatiquement</small>
                             </div>
                         </div>
 
@@ -106,7 +99,7 @@
 
                     <div class="text-center">
                         <p class="mb-0">Déjà un compte ? 
-                            <a href="{{ route('citizen.login') }}" class="text-primary">Se connecter</a>
+                            <a href="{{ route('login') }}" class="text-primary">Se connecter</a>
                         </p>
                     </div>
                 </div>
