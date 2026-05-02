@@ -47,7 +47,7 @@ class CitizenController extends Controller
 
     public function storeRequest(Request $request)
     {
-        $request->validate([
+        $baseRules = [
             'document_type' => 'required|in:cni,passeport,permis,extrait',
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
@@ -55,7 +55,55 @@ class CitizenController extends Controller
             'birth_place' => 'required|string|max:255',
             'address' => 'required|string|max:500',
             'phone' => 'required|string|max:20'
-        ]);
+        ];
+
+        $additionalRules = [];
+        
+        // Règles spécifiques selon le type de document
+        switch ($request->document_type) {
+            case 'extrait':
+                $additionalRules = [
+                    'father_name' => 'required|string|max:255',
+                    'mother_name' => 'required|string|max:255',
+                    'father_profession' => 'nullable|string|max:255',
+                    'mother_profession' => 'nullable|string|max:255',
+                    'declaration_date' => 'nullable|date',
+                    'declaration_place' => 'nullable|string|max:255'
+                ];
+                break;
+                
+            case 'cni':
+                $additionalRules = [
+                    'profession' => 'required|string|max:255',
+                    'height' => 'nullable|integer|min:100|max:250',
+                    'distinguishing_marks' => 'nullable|string|max:500',
+                    'has_previous_cni' => 'required|string|in:first,renewal,duplicate',
+                    'previous_cni' => 'required_if:has_previous_cni,renewal,duplicate|nullable|string|max:50'
+                ];
+                break;
+                
+            case 'passeport':
+                $additionalRules = [
+                    'profession_passport' => 'required|string|max:255',
+                    'travel_purpose' => 'required|string|max:50',
+                    'destination_countries' => 'nullable|string|max:500',
+                    'has_previous_passport' => 'required|string|in:first,renewal,duplicate',
+                    'previous_passport' => 'required_if:has_previous_passport,renewal,duplicate|nullable|string|max:50'
+                ];
+                break;
+                
+            case 'permis':
+                $additionalRules = [
+                    'license_category' => 'required|string|max:10',
+                    'driving_experience' => 'nullable|integer|min:0|max:50',
+                    'license_issue_country' => 'nullable|string|max:100',
+                    'has_previous_license' => 'required|string|in:first,renewal,duplicate,exchange',
+                    'previous_license' => 'required_if:has_previous_license,renewal,duplicate,exchange|nullable|string|max:50'
+                ];
+                break;
+        }
+
+        $request->validate(array_merge($baseRules, $additionalRules));
 
         $citizenId = Session::get('citizen_id');
         $documentType = $request->document_type;
@@ -63,7 +111,61 @@ class CitizenController extends Controller
         // Generate unique reference
         $reference = $this->generateReference($documentType);
 
-        DocumentRequest::create([
+        // Préparer les données supplémentaires
+        $additionalData = [];
+        
+        switch ($request->document_type) {
+            case 'extrait':
+                $additionalData = [
+                    'notes' => json_encode([
+                        'father_name' => $request->father_name,
+                        'mother_name' => $request->mother_name,
+                        'father_profession' => $request->father_profession,
+                        'mother_profession' => $request->mother_profession,
+                        'declaration_date' => $request->declaration_date,
+                        'declaration_place' => $request->declaration_place
+                    ])
+                ];
+                break;
+                
+            case 'cni':
+                $additionalData = [
+                    'notes' => json_encode([
+                        'profession' => $request->profession,
+                        'height' => $request->height,
+                        'distinguishing_marks' => $request->distinguishing_marks,
+                        'has_previous_cni' => $request->has_previous_cni,
+                        'previous_cni' => $request->previous_cni
+                    ])
+                ];
+                break;
+                
+            case 'passeport':
+                $additionalData = [
+                    'notes' => json_encode([
+                        'profession' => $request->profession_passport,
+                        'travel_purpose' => $request->travel_purpose,
+                        'destination_countries' => $request->destination_countries,
+                        'has_previous_passport' => $request->has_previous_passport,
+                        'previous_passport' => $request->previous_passport
+                    ])
+                ];
+                break;
+                
+            case 'permis':
+                $additionalData = [
+                    'notes' => json_encode([
+                        'license_category' => $request->license_category,
+                        'driving_experience' => $request->driving_experience,
+                        'license_issue_country' => $request->license_issue_country,
+                        'has_previous_license' => $request->has_previous_license,
+                        'previous_license' => $request->previous_license
+                    ])
+                ];
+                break;
+        }
+
+        DocumentRequest::create(array_merge([
             'reference' => $reference,
             'user_id' => $citizenId,
             'document_type' => $documentType,
@@ -75,7 +177,7 @@ class CitizenController extends Controller
             'phone' => $request->phone,
             'status' => 'en cours',
             'priority' => 'normal'
-        ]);
+        ], $additionalData));
 
         return redirect()->route('citizen.dashboard')->with('success', 'Votre demande a été soumise avec succès');
     }
@@ -219,6 +321,10 @@ class CitizenController extends Controller
     {
         $documentType = $this->getDocumentTypeLabel($document->document_type);
         
+        // Récupérer les données de la demande associée
+        $request = DocumentRequest::where('reference', $document->reference)->first();
+        $additionalData = $request ? json_decode($request->notes, true) : [];
+        
         $html = '<!DOCTYPE html>
 <html>
 <head>
@@ -350,7 +456,11 @@ class CitizenController extends Controller
                 <div class="field">
                     <span class="label">Statut:</span>
                     <span class="valid">VALIDE</span>
-                </div>
+                </div>';
+        
+        // Ajouter les champs spécifiques selon le type de document
+        if ($document->document_type === 'extrait') {
+            $html .= '
             </div>
             
             <div class="section">
@@ -366,9 +476,185 @@ class CitizenController extends Controller
                 <div class="field">
                     <span class="label">Lieu de naissance:</span>
                     <span class="value">' . ucfirst($document->birth_place) . '</span>
+                </div>';
+            
+            if ($request) {
+                $html .= '
+                <div class="field">
+                    <span class="label">Nom du père:</span>
+                    <span class="value">' . strtoupper($additionalData['father_name'] ?? 'Non spécifié') . '</span>
                 </div>
+                <div class="field">
+                    <span class="label">Nom de la mère:</span>
+                    <span class="value">' . strtoupper($additionalData['mother_name'] ?? 'Non spécifié') . '</span>
+                </div>
+                <div class="field">
+                    <span class="label">Profession du père:</span>
+                    <span class="value">' . ucfirst($additionalData['father_profession'] ?? 'Non spécifié') . '</span>
+                </div>
+                <div class="field">
+                    <span class="label">Profession de la mère:</span>
+                    <span class="value">' . ucfirst($additionalData['mother_profession'] ?? 'Non spécifié') . '</span>
+                </div>
+                <div class="field">
+                    <span class="label">Date de déclaration:</span>
+                    <span class="value">' . ($additionalData['declaration_date'] ? date('d/m/Y', strtotime($additionalData['declaration_date'])) : 'Non spécifié') . '</span>
+                </div>
+                <div class="field">
+                    <span class="label">Lieu de déclaration:</span>
+                    <span class="value">' . ucfirst($additionalData['declaration_place'] ?? 'Non spécifié') . '</span>
+                </div>';
+            }
+            
+            $html .= '
             </div>
             
+            <div class="section">
+                <div class="section-title">Acte de Naissance</div>
+                <p style="text-align: center; font-style: italic; margin: 20px 0;">
+                    Le soussigné, Officier de l\'État Civil, certifie que l\'acte de naissance ci-dessus
+                    a été enregistré dans les registres de la commune et que le présent document
+                    est une copie conforme de l\'original.
+                </p>
+            </div>';
+            
+        } elseif ($document->document_type === 'cni') {
+            $html .= '
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Informations du Titulaire</div>
+                <div class="field">
+                    <span class="label">Nom complet:</span>
+                    <span class="value">' . strtoupper($document->holder_name) . '</span>
+                </div>
+                <div class="field">
+                    <span class="label">Date de naissance:</span>
+                    <span class="value">' . $document->birth_date . '</span>
+                </div>
+                <div class="field">
+                    <span class="label">Lieu de naissance:</span>
+                    <span class="value">' . ucfirst($document->birth_place) . '</span>
+                </div>';
+            
+            if ($request) {
+                $html .= '
+                <div class="field">
+                    <span class="label">Profession:</span>
+                    <span class="value">' . ucfirst($additionalData['profession'] ?? 'Non spécifié') . '</span>
+                </div>
+                <div class="field">
+                    <span class="label">Taille:</span>
+                    <span class="value">' . ($additionalData['height'] ? $additionalData['height'] . ' cm' : 'Non spécifié') . '</span>
+                </div>
+                <div class="field">
+                    <span class="label">Signes particuliers:</span>
+                    <span class="value">' . ucfirst($additionalData['distinguishing_marks'] ?? 'Aucun') . '</span>
+                </div>';
+            }
+            
+            $html .= '
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Caractéristiques de la CNI</div>
+                <p style="text-align: center; font-weight: bold; margin: 20px 0;">
+                    Carte Nationale d\'Identité biométrique valide sur le territoire guinéen
+                </p>
+            </div>';
+            
+        } elseif ($document->document_type === 'passeport') {
+            $html .= '
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Informations du Titulaire</div>
+                <div class="field">
+                    <span class="label">Nom complet:</span>
+                    <span class="value">' . strtoupper($document->holder_name) . '</span>
+                </div>
+                <div class="field">
+                    <span class="label">Date de naissance:</span>
+                    <span class="value">' . $document->birth_date . '</span>
+                </div>
+                <div class="field">
+                    <span class="label">Lieu de naissance:</span>
+                    <span class="value">' . ucfirst($document->birth_place) . '</span>
+                </div>';
+            
+            if ($request) {
+                $html .= '
+                <div class="field">
+                    <span class="label">Profession:</span>
+                    <span class="value">' . ucfirst($additionalData['profession'] ?? 'Non spécifié') . '</span>
+                </div>
+                <div class="field">
+                    <span class="label">Motif de voyage:</span>
+                    <span class="value">' . ucfirst($additionalData['travel_purpose'] ?? 'Non spécifié') . '</span>
+                </div>
+                <div class="field">
+                    <span class="label">Pays de destination:</span>
+                    <span class="value">' . ucfirst($additionalData['destination_countries'] ?? 'Non spécifié') . '</span>
+                </div>';
+            }
+            
+            $html .= '
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Passeport Guinéen</div>
+                <p style="text-align: center; font-weight: bold; margin: 20px 0;">
+                    Passeport diplomatique valide pour les voyages internationaux
+                </p>
+            </div>';
+            
+        } elseif ($document->document_type === 'permis') {
+            $html .= '
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Informations du Titulaire</div>
+                <div class="field">
+                    <span class="label">Nom complet:</span>
+                    <span class="value">' . strtoupper($document->holder_name) . '</span>
+                </div>
+                <div class="field">
+                    <span class="label">Date de naissance:</span>
+                    <span class="value">' . $document->birth_date . '</span>
+                </div>
+                <div class="field">
+                    <span class="label">Lieu de naissance:</span>
+                    <span class="value">' . ucfirst($document->birth_place) . '</span>
+                </div>';
+            
+            if ($request) {
+                $html .= '
+                <div class="field">
+                    <span class="label">Catégorie:</span>
+                    <span class="value">' . strtoupper($additionalData['license_category'] ?? 'Non spécifié') . '</span>
+                </div>
+                <div class="field">
+                    <span class="label">Années d\'expérience:</span>
+                    <span class="value">' . ($additionalData['driving_experience'] ?? '0') . ' ans</span>
+                </div>
+                <div class="field">
+                    <span class="label">Pays de délivrance:</span>
+                    <span class="value">' . ucfirst($additionalData['license_issue_country'] ?? 'Guinée') . '</span>
+                </div>';
+            }
+            
+            $html .= '
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Permis de Conduire</div>
+                <p style="text-align: center; font-weight: bold; margin: 20px 0;">
+                    Permis de conduire valide sur le territoire guinéen
+                </p>
+            </div>';
+        }
+        
+        $html .= '
             <div class="qr-code">
                 <div class="section-title">Code de Vérification</div>
                 <div style="font-size: 18px; font-weight: bold; color: #0066cc;">

@@ -130,6 +130,189 @@
                                    value="{{ old('phone') }}" required>
                         </div>
 
+                        <!-- Champs spécifiques selon le type de document -->
+                        <div id="specific-fields">
+                            <!-- Champs pour Extrait de naissance -->
+                            <div id="extrait-fields" style="display: none;" class="mb-4">
+                                <hr>
+                                <h5 class="mb-3">Informations pour l'extrait de naissance</h5>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="father_name" class="form-label">Nom du père *</label>
+                                        <input type="text" class="form-control" id="father_name" name="father_name" 
+                                               value="{{ old('father_name') }}">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="mother_name" class="form-label">Nom de la mère *</label>
+                                        <input type="text" class="form-control" id="mother_name" name="mother_name" 
+                                               value="{{ old('mother_name') }}">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="father_profession" class="form-label">Profession du père</label>
+                                        <input type="text" class="form-control" id="father_profession" name="father_profession" 
+                                               value="{{ old('father_profession') }}">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="mother_profession" class="form-label">Profession de la mère</label>
+                                        <input type="text" class="form-control" id="mother_profession" name="mother_profession" 
+                                               value="{{ old('mother_profession') }}">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="declaration_date" class="form-label">Date de déclaration</label>
+                                        <input type="date" class="form-control" id="declaration_date" name="declaration_date" 
+                                               value="{{ old('declaration_date') }}">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="declaration_place" class="form-label">Lieu de déclaration</label>
+                                        <input type="text" class="form-control" id="declaration_place" name="declaration_place" 
+                                               value="{{ old('declaration_place') }}">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Champs pour CNI -->
+                            <div id="cni-fields" style="display: none;" class="mb-4">
+                                <hr>
+                                <h5 class="mb-3">Informations pour la CNI</h5>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="profession" class="form-label">Profession *</label>
+                                        <input type="text" class="form-control" id="profession" name="profession" 
+                                               value="{{ old('profession') }}">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="height" class="form-label">Taille (cm)</label>
+                                        <input type="number" class="form-control" id="height" name="height" 
+                                               value="{{ old('height') }}" min="100" max="250">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="distinguishing_marks" class="form-label">Signes particuliers</label>
+                                        <input type="text" class="form-control" id="distinguishing_marks" name="distinguishing_marks" 
+                                               value="{{ old('distinguishing_marks') }}" placeholder="Tatouages, cicatrices, etc.">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="has_previous_cni" class="form-label">Type de demande *</label>
+                                        <select class="form-control" id="has_previous_cni" name="has_previous_cni" onchange="togglePreviousCNI()">
+                                            <option value="">Sélectionnez...</option>
+                                            <option value="first">Première demande</option>
+                                            <option value="renewal">Renouvellement</option>
+                                            <option value="duplicate">Duplicata</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row" id="previous_cni_row" style="display: none;">
+                                    <div class="col-md-12 mb-3">
+                                        <label for="previous_cni" class="form-label">Ancien numéro CNI</label>
+                                        <input type="text" class="form-control" id="previous_cni" name="previous_cni" 
+                                               value="{{ old('previous_cni') }}" placeholder="Ex: CNI-2020-000001">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Champs pour Passeport -->
+                            <div id="passeport-fields" style="display: none;" class="mb-4">
+                                <hr>
+                                <h5 class="mb-3">Informations pour le passeport</h5>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="profession" class="form-label">Profession *</label>
+                                        <input type="text" class="form-control" id="profession_passport" name="profession_passport" 
+                                               value="{{ old('profession_passport') }}">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="travel_purpose" class="form-label">Motif de voyage *</label>
+                                        <select class="form-control" id="travel_purpose" name="travel_purpose">
+                                            <option value="">Sélectionnez...</option>
+                                            <option value="tourisme">Tourisme</option>
+                                            <option value="affaires">Affaires</option>
+                                            <option value="etudes">Études</option>
+                                            <option value="medical">Médical</option>
+                                            <option value="family">Familial</option>
+                                            <option value="work">Travail</option>
+                                            <option value="other">Autre</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="destination_countries" class="form-label">Pays de destination</label>
+                                        <input type="text" class="form-control" id="destination_countries" name="destination_countries" 
+                                               value="{{ old('destination_countries') }}" placeholder="Ex: France, Belgique, Sénégal">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="has_previous_passport" class="form-label">Type de demande *</label>
+                                        <select class="form-control" id="has_previous_passport" name="has_previous_passport" onchange="togglePreviousPassport()">
+                                            <option value="">Sélectionnez...</option>
+                                            <option value="first">Première demande</option>
+                                            <option value="renewal">Renouvellement</option>
+                                            <option value="duplicate">Duplicata</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row" id="previous_passport_row" style="display: none;">
+                                    <div class="col-md-12 mb-3">
+                                        <label for="previous_passport" class="form-label">Ancien numéro passeport</label>
+                                        <input type="text" class="form-control" id="previous_passport" name="previous_passport" 
+                                               value="{{ old('previous_passport') }}" placeholder="Ex: P00000000">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Champs pour Permis de conduire -->
+                            <div id="permis-fields" style="display: none;" class="mb-4">
+                                <hr>
+                                <h5 class="mb-3">Informations pour le permis de conduire</h5>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="license_category" class="form-label">Catégorie demandée *</label>
+                                        <select class="form-control" id="license_category" name="license_category">
+                                            <option value="">Sélectionnez...</option>
+                                            <option value="A">A - Moto</option>
+                                            <option value="B">B - Voiture</option>
+                                            <option value="C">C - Poids lourd</option>
+                                            <option value="D">D - Transport de personnes</option>
+                                            <option value="E">E - Remorque</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="driving_experience" class="form-label">Années d'expérience</label>
+                                        <input type="number" class="form-control" id="driving_experience" name="driving_experience" 
+                                               value="{{ old('driving_experience') }}" min="0" max="50">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="license_issue_country" class="form-label">Pays de délivrance</label>
+                                        <input type="text" class="form-control" id="license_issue_country" name="license_issue_country" 
+                                               value="{{ old('license_issue_country') }}" placeholder="Guinée">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="has_previous_license" class="form-label">Type de demande *</label>
+                                        <select class="form-control" id="has_previous_license" name="has_previous_license" onchange="togglePreviousLicense()">
+                                            <option value="">Sélectionnez...</option>
+                                            <option value="first">Première demande</option>
+                                            <option value="renewal">Renouvellement</option>
+                                            <option value="duplicate">Duplicata</option>
+                                            <option value="exchange">Échange permis étranger</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row" id="previous_license_row" style="display: none;">
+                                    <div class="col-md-12 mb-3">
+                                        <label for="previous_license" class="form-label">Ancien numéro de permis</label>
+                                        <input type="text" class="form-control" id="previous_license" name="previous_license" 
+                                               value="{{ old('previous_license') }}" placeholder="Ex: 1234567890">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <hr>
 
                         <h5 class="mb-3">Documents à joindre</h5>
@@ -162,4 +345,86 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const documentTypeRadios = document.querySelectorAll('input[name="document_type"]');
+    const specificFields = document.getElementById('specific-fields');
+    
+    function showSpecificFields(type) {
+        // Masquer tous les champs spécifiques
+        document.getElementById('extrait-fields').style.display = 'none';
+        document.getElementById('cni-fields').style.display = 'none';
+        document.getElementById('passeport-fields').style.display = 'none';
+        document.getElementById('permis-fields').style.display = 'none';
+        
+        // Afficher les champs correspondants
+        if (type) {
+            const fieldId = type + '-fields';
+            const fieldElement = document.getElementById(fieldId);
+            if (fieldElement) {
+                fieldElement.style.display = 'block';
+            }
+        }
+    }
+    
+    documentTypeRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            showSpecificFields(this.value);
+        });
+    });
+    
+    // Afficher les champs si un type est déjà sélectionné
+    const selectedType = document.querySelector('input[name="document_type"]:checked');
+    if (selectedType) {
+        showSpecificFields(selectedType.value);
+    }
+});
+
+// Fonctions pour gérer l'affichage des champs "Ancien numéro"
+function togglePreviousCNI() {
+    const select = document.getElementById('has_previous_cni');
+    const row = document.getElementById('previous_cni_row');
+    const input = document.getElementById('previous_cni');
+    
+    if (select.value === 'renewal' || select.value === 'duplicate') {
+        row.style.display = 'block';
+        input.required = true;
+    } else {
+        row.style.display = 'none';
+        input.required = false;
+        input.value = '';
+    }
+}
+
+function togglePreviousPassport() {
+    const select = document.getElementById('has_previous_passport');
+    const row = document.getElementById('previous_passport_row');
+    const input = document.getElementById('previous_passport');
+    
+    if (select.value === 'renewal' || select.value === 'duplicate') {
+        row.style.display = 'block';
+        input.required = true;
+    } else {
+        row.style.display = 'none';
+        input.required = false;
+        input.value = '';
+    }
+}
+
+function togglePreviousLicense() {
+    const select = document.getElementById('has_previous_license');
+    const row = document.getElementById('previous_license_row');
+    const input = document.getElementById('previous_license');
+    
+    if (select.value === 'renewal' || select.value === 'duplicate' || select.value === 'exchange') {
+        row.style.display = 'block';
+        input.required = true;
+    } else {
+        row.style.display = 'none';
+        input.required = false;
+        input.value = '';
+    }
+}
+</script>
 @endsection
