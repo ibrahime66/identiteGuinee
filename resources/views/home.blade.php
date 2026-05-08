@@ -7,9 +7,10 @@
 .hero-section {
     background: linear-gradient(135deg, #0066cc 0%, #0052a3 100%);
     color: white;
-    padding: 120px 0 80px;
+    padding: 80px 0 80px;
     position: relative;
     overflow: hidden;
+    margin-top: 0;
 }
 
 .hero-section::before {
@@ -26,6 +27,21 @@
 .hero-content {
     position: relative;
     z-index: 2;
+}
+
+/* Debug temporaire */
+.hero-section {
+    background: linear-gradient(135deg, #0066cc 0%, #0052a3 100%) !important;
+    color: white !important;
+    display: block !important;
+    visibility: visible !important;
+    height: auto !important;
+    min-height: 400px !important;
+}
+
+section {
+    display: block !important;
+    visibility: visible !important;
 }
 
 .hero-title {
@@ -533,14 +549,6 @@
                         La solution numérique moderne et sécurisée pour la gestion de vos documents d'identité. 
                         Accédez rapidement à tous les services administratifs en quelques clics seulement.
                     </p>
-                    <div class="hero-buttons d-flex gap-3 flex-wrap">
-                        <a href="{{ route('login') }}" class="btn-hero btn-hero-primary">
-                            <i class="fas fa-sign-in-alt me-2"></i>Se connecter
-                        </a>
-                        <a href="{{ route('citizen.register') }}" class="btn-hero btn-hero-outline">
-                            <i class="fas fa-user-plus me-2"></i>Créer un compte
-                        </a>
-                    </div>
                 </div>
             </div>
             <div class="col-lg-6">
