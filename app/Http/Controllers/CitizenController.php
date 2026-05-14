@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Auth;
 use App\Models\DocumentRequest;
 use App\Models\Document;
 use App\Models\User;
@@ -14,16 +14,16 @@ class CitizenController extends Controller
     public function __construct()
     {
         $this->middleware(function ($request, $next) {
-            if (!Session::get('citizen_authenticated')) {
+            if (!Auth::check() || Auth::user()?->role !== 'citizen') {
                 return redirect()->route('login');
             }
             return $next($request);
-        })->except(['showCitizenLogin', 'citizenLogin', 'showCitizenRegister', 'citizenRegister']);
+        });
     }
 
     public function dashboard()
     {
-        $citizenId = Session::get('citizen_id');
+        $citizenId = Auth::id();
         $requests = DocumentRequest::where('user_id', $citizenId)
             ->orderBy('created_at', 'desc')
             ->get()
@@ -110,7 +110,7 @@ class CitizenController extends Controller
 
         $request->validate(array_merge($baseRules, $additionalRules));
 
-        $citizenId = Session::get('citizen_id');
+        $citizenId = Auth::id();
         $documentType = $request->document_type;
         
         // Generate unique reference

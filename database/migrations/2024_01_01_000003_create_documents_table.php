@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('reference')->unique();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('request_id')->constrained()->onDelete('cascade');
+            $table->foreignId('request_id')->constrained('document_requests')->onDelete('cascade');
             $table->enum('document_type', ['cni', 'passeport', 'permis']);
             $table->string('holder_name');
             $table->date('birth_date');

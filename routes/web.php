@@ -9,6 +9,18 @@ use App\Http\Controllers\AuthController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
+Route::get('/debug-auth', function (\Illuminate\Http\Request $request) {
+    return response()->json([
+        'host' => $request->getHost(),
+        'full_url' => $request->fullUrl(),
+        'session_id' => $request->session()->getId(),
+        'auth_check' => \Illuminate\Support\Facades\Auth::check(),
+        'user_id' => \Illuminate\Support\Facades\Auth::id(),
+        'role' => \Illuminate\Support\Facades\Auth::user()?->role,
+        'email' => \Illuminate\Support\Facades\Auth::user()?->email,
+    ]);
+});
+
 // Connexion unique pour tous les rôles
 Route::get('/connexion', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/connexion', [AuthController::class, 'login']);

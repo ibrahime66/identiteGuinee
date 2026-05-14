@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Auth;
 use App\Models\DocumentRequest;
 use App\Models\Document;
 use App\Models\User;
@@ -13,11 +13,11 @@ class AdminController extends Controller
     public function __construct()
     {
         $this->middleware(function ($request, $next) {
-            if (!Session::get('admin_authenticated')) {
+            if (!Auth::check() || Auth::user()?->role !== 'admin') {
                 return redirect()->route('login');
             }
             return $next($request);
-        })->except(['showAdminLogin', 'adminLogin']);
+        });
     }
 
     public function dashboard()
@@ -104,7 +104,7 @@ class AdminController extends Controller
 
     public function validateRequest(Request $request, $id)
     {
-        $adminId = Session::get('admin_id');
+        $adminId = Auth::id();
         $documentRequest = DocumentRequest::findOrFail($id);
         
         $documentRequest->update([
@@ -146,7 +146,7 @@ class AdminController extends Controller
             'status' => 'rejetée',
             'rejection_reason' => $request->rejection_reason,
             'rejected_at' => now(),
-            'rejected_by' => Session::get('admin_id')
+            'rejected_by' => Auth::id()
         ]);
 
         return redirect()->route('admin.requests')->with('success', 'Demande rejetée avec succès');
