@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use App\Models\User;
 
 class AuthController extends Controller
@@ -17,43 +16,22 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        Log::info('AUTH login controller hit', [
-            'method' => $request->method(),
-            'path' => $request->path(),
-            'host' => $request->getHost(),
-            'email' => $request->input('email'),
-            'has_password' => $request->filled('password'),
-            'session_id_before_validate' => $request->session()->getId(),
-        ]);
         $request->validate([
             'email' => 'required|email',
             'password' => 'required|min:6'
         ]);
 
         $credentials = $request->only('email', 'password');
-        Log::info('AUTH login attempt start', [
-            'email' => $request->input('email'),
-            'session_id_before' => $request->session()->getId(),
-        ]);
         
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
             $user = Auth::user();
-            Log::info('AUTH login attempt success', [
-                'user_id' => $user?->id,
-                'role' => $user?->role,
-                'session_id_after' => $request->session()->getId(),
-            ]);
             
             // Vérifier le rôle et rediriger selon le cas
             if ($user->role === 'admin') {
                 Session::put('admin_authenticated', true);
                 Session::put('admin_name', $user->name);
                 Session::put('admin_id', $user->id);
-                Log::info('AUTH redirect admin.dashboard', [
-                    'user_id' => $user->id,
-                    'session_id' => $request->session()->getId(),
-                ]);
                 
                 return redirect()->route('admin.dashboard')->with('success', 'Connexion administrateur réussie');
                 
@@ -62,28 +40,15 @@ class AuthController extends Controller
                 Session::put('citizen_name', $user->name);
                 Session::put('citizen_email', $user->email);
                 Session::put('citizen_id', $user->id);
-                Log::info('AUTH redirect citizen.dashboard', [
-                    'user_id' => $user->id,
-                    'session_id' => $request->session()->getId(),
-                ]);
                 
                 return redirect()->route('citizen.dashboard')->with('success', 'Connexion citoyen réussie');
                 
             } else {
                 Auth::logout();
-                Log::warning('AUTH login role not recognized', [
-                    'user_id' => $user?->id,
-                    'role' => $user?->role,
-                    'session_id' => $request->session()->getId(),
-                ]);
                 return back()->with('error', 'Rôle non reconnu')->withInput();
             }
         }
 
-        Log::warning('AUTH login attempt failed', [
-            'email' => $request->input('email'),
-            'session_id' => $request->session()->getId(),
-        ]);
         return back()->with('error', 'Email ou mot de passe incorrect')->withInput();
     }
 
