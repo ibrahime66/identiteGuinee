@@ -3,6 +3,8 @@
 /public/storage
 /storage/*.key
 /vendor
+/bootstrap/cache/*.php
+/bootstrap/cache/*.tmp
 /.env
 /.env.backup
 /.env.production

@@ -23,17 +23,12 @@ class AuthController extends Controller
 
         $credentials = $request->only('email', 'password');
         
-        if (Auth::attempt($credentials)) {
+        if (Auth::attempt($credentials, $request->boolean('remember'))) {
+            $request->session()->regenerate();
             $user = Auth::user();
             
             // Vérifier le rôle et rediriger selon le cas
             if ($user->role === 'admin') {
-                // Vérifier que c'est l'email admin autorisé
-                if ($user->email !== 'ibrahimebarry520@gmail.com') {
-                    Auth::logout();
-                    return back()->with('error', 'Accès administrateur non autorisé')->withInput();
-                }
-                
                 Session::put('admin_authenticated', true);
                 Session::put('admin_name', $user->name);
                 Session::put('admin_id', $user->id);
@@ -84,14 +79,7 @@ class AuthController extends Controller
             'nationality' => 'Guinéenne'
         ]);
 
-        Auth::login($user);
-        
-        Session::put('citizen_authenticated', true);
-        Session::put('citizen_name', $user->name);
-        Session::put('citizen_email', $user->email);
-        Session::put('citizen_id', $user->id);
-        
-        return redirect()->route('citizen.dashboard')->with('success', 'Inscription réussie ! Votre numéro CNI est : ' . $cniNumber);
+        return redirect()->route('login')->with('success', 'Inscription réussie ! Votre numéro CNI est : ' . $cniNumber);
     }
 
     private function generateCniNumber()
@@ -121,14 +109,10 @@ class AuthController extends Controller
             'password' => 'required|min:6'
         ]);
 
-        // Vérifier que l'email est autorisé pour l'admin
-        if ($request->email !== 'ibrahimebarry520@gmail.com') {
-            return back()->with('error', 'Accès administrateur non autorisé')->withInput();
-        }
-
         $credentials = $request->only('email', 'password');
         
         if (Auth::attempt($credentials)) {
+            $request->session()->regenerate();
             $user = Auth::user();
             
             if ($user->role === 'admin') {
