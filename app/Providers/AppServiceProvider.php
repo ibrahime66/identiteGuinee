@@ -19,6 +19,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Fix migration table configuration issue
+        $this->app->bind('migration.repository', function ($app) {
+            $table = $app['config']['database.migrations.table'];
+            return new \Illuminate\Database\Migrations\DatabaseMigrationRepository(
+                $app['db'],
+                $table
+            );
+        });
     }
 }
